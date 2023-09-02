@@ -1,6 +1,9 @@
 asgiref==3.7.2
 Django==4.2.4
 django-extensions==3.2.3
+django-phonenumber-field==7.1.0
 django-split-settings==1.2.0
+mysqlclient==2.2.0
+phonenumbers==8.13.19
 python-dotenv==1.0.0
 sqlparse==0.4.4
