@@ -1,0 +1,59 @@
+version: '3'
+
+x-base: &base
+    env_file:
+        - .env
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: 'mysql'
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - ${MYSQL_PORT}:${MYSQL_PORT}
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+#  django_app:
+#      build:
+#        context: django_app
+#      command: uwsgi --strict --ini uwsgi.ini
+#      container_name: django_app
+#      env_file:
+#          - .env
+#      volumes:
+#        - ./django_app/media:/opt/app/media
+#      depends_on:
+#        postgres:
+#          condition: service_healthy
+#      healthcheck:
+#        test: [ "CMD", "curl", "-f", "http://localhost:8000"]
+#        interval: 30s
+#        timeout: 10s
+#        retries: 5
+#      expose:
+#        - "8000"
+
+#  nginx:
+#    image: nginx:latest
+#    container_name: 'nginx'
+#    volumes:
+#      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+#      - ./nginx/configs:/etc/nginx/templates:ro
+#      - ./nginx/logs:/etc/nginx/logs
+#    environment:
+#      NGINX_ENVSUBST_TEMPLATE_SUFFIX: ".template"
+#      NGINX_SET_REAL_IP_FROM: 192.168.1.0/24
+#      DJANGO_PORT: ${DJANGO_PORT}
+#    ports:
+#      - ${NGINX_PORT}:80
+#    depends_on:
+#      - django_app
+
+# Names our volume
+volumes:
+  mysql-data:
