@@ -9,7 +9,6 @@ def user_has_mailing_access(view_func):
     def _wrapped_view(request, *args, **kwargs):
         user = request.user
         try:
-            print(kwargs)
             pk = kwargs['pk']
             script = Mailing.objects.get(pk=pk)
             if script.user != user:

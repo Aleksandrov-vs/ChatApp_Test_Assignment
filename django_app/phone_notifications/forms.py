@@ -1,5 +1,4 @@
 from django import forms
-
 from phone_notifications.models import Mailing, PhoneNotification
 
 

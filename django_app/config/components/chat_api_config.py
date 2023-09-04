@@ -9,7 +9,7 @@ class ChatApiSettings(BaseSettings):
     license_id: int = Field(env='LICENSE_ID')
 
     lower_limit_delay: int = Field(5, env='LOWER_LIMIT_DELAY')
-    upper_limit_delay: int = Field(5, env='UPPER_LIMIT_DELAY')
+    upper_limit_delay: int = Field(50, env='UPPER_LIMIT_DELAY')
 
 
 CHAT_API_SETTINGS = ChatApiSettings()

@@ -1,6 +1,5 @@
-from phone_notifications.views import MailingView, MailingDetailView
 from django.urls import path
-
+from phone_notifications.views import MailingDetailView, MailingView
 
 urlpatterns = [
     path('', MailingView.as_view(), name='home'),

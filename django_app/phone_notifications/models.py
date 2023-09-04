@@ -1,9 +1,9 @@
 import uuid
-from phonenumber_field.modelfields import PhoneNumberField
-from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
 
+from django.contrib.auth.models import User
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class UUIDMixin(models.Model):
@@ -29,6 +29,9 @@ class Mailing(UUIDMixin, TimeStampedMixin):
         null=False
     )
 
+    def __str__(self):
+        return self.message
+
 
 class SendStatus(models.TextChoices):
     NEW = 'new', _('New')
@@ -51,4 +54,7 @@ class PhoneNotification(UUIDMixin, TimeStampedMixin):
         default=SendStatus.NEW,
         null=False
     )
-    err_text = models.TextField(null=True, default=None)
+    err_text = models.TextField(default='')
+
+    def __str__(self):
+        return self.number

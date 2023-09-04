@@ -2,12 +2,12 @@ import logging
 from http import HTTPStatus
 
 import requests
-
-from chatapp_api.api.utils import try_request_with_token_auth
-from .exceptions import AuthorizationError, PhoneDoesNotExist
-from chatapp_api.api.models import AuthResponse, CheckPhoneResponse, \
-    SendMsgResponse, PairOfTokens
+from chatapp_api.api.models import (AuthResponse, CheckPhoneResponse,
+                                    PairOfTokens, SendMsgResponse)
 from chatapp_api.api.repository import TokenRepository
+from chatapp_api.api.utils import try_request_with_token_auth
+
+from .exceptions import AuthorizationError, PhoneDoesNotExist
 
 
 class ChatAppApiService:

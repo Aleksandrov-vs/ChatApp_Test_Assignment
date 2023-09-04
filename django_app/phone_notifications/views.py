@@ -1,17 +1,19 @@
 import logging
 import random
 
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.views.generic import ListView, DetailView
 from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views.generic import DetailView, ListView
+from django.conf import settings
 
 from phone_notifications.decorators.access_decorators import \
     user_has_mailing_access
-from phone_notifications.forms import PhoneNumberFormSet, MailingForm
+from phone_notifications.forms import MailingForm, PhoneNumberFormSet
 from phone_notifications.models import Mailing
+
 from .tasks import send_message
 
 
@@ -46,14 +48,15 @@ class MailingView(ListView):
             if phone_number_formset.is_valid():
                 mailing.save()
                 phone_number_set = phone_number_formset.save()
-
                 for phone_number in phone_number_set:
-                    delay_seconds = random.randint(2, 4)
+                    delay_seconds = random.randint(
+                        settings.CHAT_API_SETTINGS.lower_limit_delay,
+                        settings.CHAT_API_SETTINGS.upper_limit_delay
+                    )
                     send_message.apply_async(
                         [phone_number.id, mailing.message],
                         countdown=delay_seconds
                     )
-                    logging.info(f'Поставил в очередь: {phone_number.number}')
 
                 return HttpResponseRedirect(reverse(self.success_url))
             else:
