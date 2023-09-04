@@ -13,8 +13,8 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    ports:
-      - ${MYSQL_PORT}:${MYSQL_PORT}
+    expose:
+      - ${MYSQL_PORT}
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
@@ -77,8 +77,8 @@ services:
         interval: 30s
         timeout: 10s
         retries: 5
-      ports:
-        - "8000:8000"
+      expose:
+        - "${DJANGO_PORT}"
 
   nginx:
     image: nginx:latest
