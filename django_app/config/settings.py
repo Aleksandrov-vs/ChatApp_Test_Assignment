@@ -19,6 +19,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', False) == 'True'
 
+if DEBUG:
+    import socket
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] +\
+                   ["127.0.0.1", ]
+
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 LOGIN_REDIRECT_URL = '/'
@@ -77,10 +83,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 if DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, '../data/static/')
-    STATIC_DIR = os.path.join(BASE_DIR, '../data/static')
+    STATIC_ROOT = os.path.join(BASE_DIR, './static/')
+    STATIC_DIR = os.path.join(BASE_DIR, './static')
 else:
-    STATIC_ROOT = os.path.join(BASE_DIR, '../data/static/')
+    STATIC_ROOT = os.path.join(BASE_DIR, './static/')
     STATICFILES_FINDERS = (
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
