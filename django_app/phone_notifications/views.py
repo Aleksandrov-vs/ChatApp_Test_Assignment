@@ -1,3 +1,4 @@
+import logging
 import random
 
 from django.shortcuts import render
@@ -38,22 +39,24 @@ class MailingView(ListView):
         if mailing_form.is_valid():
             mailing = mailing_form.save(commit=False)
             mailing.user = request.user
-            mailing.save()
             phone_number_formset = PhoneNumberFormSet(
                 request.POST,
                 instance=mailing
             )
             if phone_number_formset.is_valid():
+                mailing.save()
                 phone_number_set = phone_number_formset.save()
+
                 for phone_number in phone_number_set:
                     delay_seconds = random.randint(2, 4)
                     send_message.apply_async(
                         [phone_number.id, mailing.message],
                         countdown=delay_seconds
                     )
+                    logging.info(f'Поставил в очередь: {phone_number.number}')
+
                 return HttpResponseRedirect(reverse(self.success_url))
             else:
-
                 return render(request, self.template_name, {
                     'mailing_form': mailing_form,
                     'phone_number_formset': phone_number_formset,
