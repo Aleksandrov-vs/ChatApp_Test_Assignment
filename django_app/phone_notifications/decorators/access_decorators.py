@@ -1,6 +1,7 @@
 from functools import wraps
 
 from django.http import Http404
+
 from phone_notifications.models import Mailing
 
 

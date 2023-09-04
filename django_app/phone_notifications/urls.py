@@ -1,4 +1,5 @@
 from django.urls import path
+
 from phone_notifications.views import MailingDetailView, MailingView
 
 urlpatterns = [

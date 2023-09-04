@@ -1,8 +1,9 @@
 from datetime import datetime
 
+from django.utils import timezone
+
 from chatapp_api.api.models import AuthResponse, PairOfTokens
 from chatapp_api.models import Token
-from django.utils import timezone
 
 
 class TokenRepository:
