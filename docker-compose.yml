@@ -26,16 +26,28 @@ services:
   celery:
     build: ./django_app
     container_name: 'celery'
-    command: celery -A config worker -l info
+    command: celery -A config  worker -l info
     env_file:
       - .env
     volumes:
       - ./django_app:/usr/src/app
-      - ./django_app/media:/opt/app/media
     depends_on:
       - django_app
       - redis
       - mysql
+
+  dashboard:
+    build: ./django_app
+    image: mher/flower:latest
+    command: celery -A config flower --port=${FLOWER_PORT} --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD}
+    ports:
+      - ${FLOWER_PORT}:${FLOWER_PORT}
+    env_file:
+      - .env
+    depends_on:
+      - django_app
+      - redis
+      - celery
 
   redis:
     image: redis
@@ -68,23 +80,22 @@ services:
       ports:
         - "8000:8000"
 
-#  nginx:
-#    image: nginx:latest
-#    container_name: 'nginx'
-#    volumes:
-#      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-#      - ./nginx/configs:/etc/nginx/templates:ro
-#      - ./nginx/logs:/etc/nginx/logs
-#    environment:
-#      NGINX_ENVSUBST_TEMPLATE_SUFFIX: ".template"
-#      NGINX_SET_REAL_IP_FROM: 192.168.1.0/24
-#      DJANGO_PORT: ${DJANGO_PORT}
-#    ports:
-#      - ${NGINX_PORT}:80
-#    depends_on:
-#      - django_app
+  nginx:
+    image: nginx:latest
+    container_name: 'nginx'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/templates:ro
+      - ./nginx/logs:/etc/nginx/logs
+    environment:
+      NGINX_ENVSUBST_TEMPLATE_SUFFIX: ".template"
+      NGINX_SET_REAL_IP_FROM: 192.168.1.0/24
+      DJANGO_PORT: ${DJANGO_PORT}
+    ports:
+      - ${NGINX_PORT}:80
+    depends_on:
+      - django_app
 
-# Names our volume
 volumes:
   mysql-data:
     name: mysql_data
