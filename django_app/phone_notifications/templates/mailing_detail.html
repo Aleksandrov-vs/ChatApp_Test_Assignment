@@ -19,16 +19,18 @@
         <thead>
             <tr>
                 <th>номер телефона</th>
-                <th>Статус отправки</th>
                 <th>Время отправки</th>
+                <th>Статус отправки</th>
+                <th>сообщение об ошибке</th>
             </tr>
         </thead>
         <tbody>
             {% for notification in mailing.phone_notification.all %}
                 </tr>
                     <td>{{ notification.number }}</td>
-                    <td>{{ notification.send_status }}</td>
                     <td>{{ notification.modified }}</td>
+                    <td>{{ notification.send_status }}</td>
+                    <td>{{ notification.err_text }}</td>
                 </tr>
             {% endfor %}
         </tbody>

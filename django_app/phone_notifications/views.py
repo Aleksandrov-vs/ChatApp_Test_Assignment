@@ -1,3 +1,5 @@
+import random
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -9,6 +11,7 @@ from phone_notifications.decorators.access_decorators import \
     user_has_mailing_access
 from phone_notifications.forms import PhoneNumberFormSet, MailingForm
 from phone_notifications.models import Mailing
+from .tasks import send_message
 
 
 @method_decorator(login_required(), name='dispatch')
@@ -41,9 +44,16 @@ class MailingView(ListView):
                 instance=mailing
             )
             if phone_number_formset.is_valid():
-                phone_number_formset.save()
+                phone_number_set = phone_number_formset.save()
+                for phone_number in phone_number_set:
+                    delay_seconds = random.randint(2, 4)
+                    send_message.apply_async(
+                        [phone_number.id, mailing.message],
+                        countdown=delay_seconds
+                    )
                 return HttpResponseRedirect(reverse(self.success_url))
             else:
+
                 return render(request, self.template_name, {
                     'mailing_form': mailing_form,
                     'phone_number_formset': phone_number_formset,

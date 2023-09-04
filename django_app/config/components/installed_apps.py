@@ -11,4 +11,5 @@ INSTALLED_APPS = [
 
     'users',
     'phone_notifications',
+    'chatapp_api'
 ]

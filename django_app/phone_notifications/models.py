@@ -51,3 +51,4 @@ class PhoneNotification(UUIDMixin, TimeStampedMixin):
         default=SendStatus.NEW,
         null=False
     )
+    err_text = models.TextField(null=True, default=None)

@@ -17,26 +17,56 @@ services:
       - ${MYSQL_PORT}:${MYSQL_PORT}
     volumes:
       - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
-#  django_app:
-#      build:
-#        context: django_app
-#      command: uwsgi --strict --ini uwsgi.ini
-#      container_name: django_app
-#      env_file:
-#          - .env
-#      volumes:
-#        - ./django_app/media:/opt/app/media
-#      depends_on:
-#        postgres:
-#          condition: service_healthy
-#      healthcheck:
-#        test: [ "CMD", "curl", "-f", "http://localhost:8000"]
-#        interval: 30s
-#        timeout: 10s
-#        retries: 5
-#      expose:
-#        - "8000"
+  celery:
+    build: ./django_app
+    container_name: 'celery'
+    command: celery -A config worker -l info
+    env_file:
+      - .env
+    volumes:
+      - ./django_app:/usr/src/app
+      - ./django_app/media:/opt/app/media
+    depends_on:
+      - django_app
+      - redis
+      - mysql
+
+  redis:
+    image: redis
+    container_name: 'redis'
+    volumes:
+      - ./redis/data:/data
+    expose:
+      - ${REDIS_PORT}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  django_app:
+      build:
+        context: django_app
+      command: uwsgi --strict --ini uwsgi.ini
+      container_name: django_app
+      env_file:
+          - .env
+      depends_on:
+        mysql:
+          condition: service_healthy
+      healthcheck:
+        test: [ "CMD", "curl", "-f", "http://localhost:8000"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+      ports:
+        - "8000:8000"
 
 #  nginx:
 #    image: nginx:latest
@@ -57,3 +87,4 @@ services:
 # Names our volume
 volumes:
   mysql-data:
+    name: mysql_data
