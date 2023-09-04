@@ -1,11 +1,12 @@
+import logging
 from uuid import UUID
 
+from chatapp_api.api.exceptions import AuthorizationError, PhoneDoesNotExist
+from chatapp_api.api.repository import TokenRepository
+from chatapp_api.api.service import ChatAppApiService
+from config.celery import app
 from django.conf import settings
 
-from chatapp_api.api.service import ChatAppApiService
-from chatapp_api.api.repository import TokenRepository
-from chatapp_api.api.exceptions import PhoneDoesNotExist, AuthorizationError
-from config.celery import app
 from .models import PhoneNotification, SendStatus
 
 
@@ -19,6 +20,7 @@ def send_message(phone_notif_id: UUID, msg_text: str):
         license_id=settings.CHAT_API_SETTINGS.license_id,
         token_repository=TokenRepository()
     )
+    logging.info(f'Отправка сообщения: {phone_notif.number}')
     try:
         send_msg_response = chat_app_service.send_text_message(
             phone_notif.number,
@@ -39,8 +41,7 @@ def send_message(phone_notif_id: UUID, msg_text: str):
     if not send_msg_response.success:
         phone_notif.send_status = SendStatus.ERR
         phone_notif.save()
-        print(send_msg_response)
-        return f"неизвестная ошибка"
+        return "неизвестная ошибка"
     phone_notif.send_status = SendStatus.SENT
     phone_notif.save()
     return f"Message send to {phone_notif.number}."
