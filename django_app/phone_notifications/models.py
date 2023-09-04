@@ -25,7 +25,6 @@ class Mailing(UUIDMixin, TimeStampedMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField(
         _('notification message'),
-        blank=True,
         null=False
     )
 

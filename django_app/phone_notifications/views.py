@@ -38,40 +38,42 @@ class MailingView(ListView):
 
     def post(self, request, *args, **kwargs):
         mailing_form = MailingForm(request.POST)
-        if mailing_form.is_valid():
-            mailing = mailing_form.save(commit=False)
-            mailing.user = request.user
-            phone_number_formset = PhoneNumberFormSet(
-                request.POST,
-                instance=mailing
-            )
-            if phone_number_formset.is_valid():
-                mailing.save()
-                phone_number_set = phone_number_formset.save()
-                for phone_number in phone_number_set:
-                    delay_seconds = random.randint(
-                        settings.CHAT_API_SETTINGS.lower_limit_delay,
-                        settings.CHAT_API_SETTINGS.upper_limit_delay
-                    )
-                    send_message.apply_async(
-                        [phone_number.id, mailing.message],
-                        countdown=delay_seconds
-                    )
 
-                return HttpResponseRedirect(reverse(self.success_url))
-            else:
-                return render(request, self.template_name, {
-                    'mailing_form': mailing_form,
-                    'phone_number_formset': phone_number_formset,
-                    self.context_object_name: self.get_queryset()
-                })
-
-        else:
+        if not mailing_form.is_valid():
             return render(request, self.template_name, {
                 'mailing_form': mailing_form,
-                'phone_number_formset': PhoneNumberFormSet(),
+                'phone_number_formset': PhoneNumberFormSet(request.POST),
                 self.context_object_name: self.get_queryset()
             })
+
+        mailing = mailing_form.save(commit=False)
+        mailing.user = request.user
+        phone_number_formset = PhoneNumberFormSet(
+            request.POST,
+            instance=mailing
+        )
+
+        if not phone_number_formset.is_valid():
+            return render(request, self.template_name, {
+                'mailing_form': mailing_form,
+                'phone_number_formset': phone_number_formset,
+                self.context_object_name: self.get_queryset()
+            })
+
+        mailing.save()
+        phone_number_set = phone_number_formset.save()
+
+        for phone_number in phone_number_set:
+            delay_seconds = random.randint(
+                settings.CHAT_API_SETTINGS.lower_limit_delay,
+                settings.CHAT_API_SETTINGS.upper_limit_delay
+            )
+            send_message.apply_async(
+                [phone_number.id, mailing.message],
+                countdown=delay_seconds
+            )
+
+        return HttpResponseRedirect(reverse(self.success_url))
 
 
 @method_decorator([login_required(), user_has_mailing_access], name='dispatch')
